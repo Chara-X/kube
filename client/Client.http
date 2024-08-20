@@ -1,0 +1,4 @@
+POST /api/{group?}/{version}/namespaces/{namespace?}/{kind}?{dryRun=All}
+PUT /api/{group?}/{version}/namespaces/{namespace?}/{kind}/{name}?{dryRun=All}
+DELETE /api/{group?}/{version}/namespaces/{namespace?}/{kind}/{name}?{dryRun=All}
+GET /api/{group?}/{version}/namespaces/{namespace?}/{kind}?{fieldSelector={}}&{labelSelector={}}&{watch=boolean}

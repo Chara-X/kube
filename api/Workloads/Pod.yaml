@@ -1,0 +1,54 @@
+apiVersion: v2
+kind: Pod
+metadata: ObjectMeta
+spec:
+  # Containers
+  containers:
+    - name: ""
+      image: ""
+      args: []
+      ports:
+        - containerPort: 0
+      env:
+        - name: ""
+          value: ""
+      envFrom:
+        - configMapRef:
+            name: ""
+        - secretRef:
+            name: ""
+      volumeMounts:
+        - name: ""
+          mountPath: ""
+      resources:
+        limits:
+          cpu: ""
+          memory: ""
+        requests:
+          cpu: ""
+          memory: ""
+  # Volumes
+  volumes:
+    - name: ""
+      emptyDir: {}
+    - name: ""
+      configMap:
+        name: ""
+        items:
+          - key: ""
+            path: ""
+    - name: ""
+      hostPath:
+        path: ""
+  # Scheduling
+  nodeSelector: {}
+  nodeName: ""
+  schedulerName: ""
+  priority: 0
+  preemptionPolicy: PreemptLowerPriority | Never
+  # Service account
+  serviceAccountName: ""
+status:
+  hostIP: ""
+  phase: Pending | Running | Succeeded | Failed
+  podIP: ""

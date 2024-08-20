@@ -1,0 +1,7 @@
+apiVersion: apps/v1
+kind: Job
+metadata: ObjectMeta
+spec:
+  template: PodTemplateSpec
+  replicas: 0
+  completions: 0

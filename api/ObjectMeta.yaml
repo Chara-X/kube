@@ -1,0 +1,10 @@
+name: ""
+namespace: ""
+labels: {}
+annotations: {}
+# System
+ownerReferences:
+  - apiVersion: ""
+    kind: ""
+    name: ""
+    uid: ""

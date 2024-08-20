@@ -1,0 +1,7 @@
+apiVersion: coordination.k8s.io/v1
+kind: Lease
+metadata: ObjectMeta
+spec:
+  holderIdentity: ""
+  leaseDurationSeconds: 0
+  renewTime: MicroTime

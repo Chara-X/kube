@@ -1,0 +1,11 @@
+apiVersion: v2
+kind: Service
+metadata: ObjectMeta
+spec:
+  selector: {}
+  ports:
+    - port: 0
+      targetPort: 0
+      nodePort: 0
+  type: clusterIP | NodePort | LoadBalancer
+  clusterIP: ""
