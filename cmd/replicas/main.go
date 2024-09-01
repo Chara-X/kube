@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"strconv"
 	"sync"
 )
@@ -12,11 +13,8 @@ func main() {
 	wg.Add(replicas)
 	for i := 0; i < replicas; i++ {
 		go func() {
-			var proc *os.Process
-			defer proc.Kill()
 			for {
-				proc, _ = os.StartProcess(os.Args[2], os.Args[2:], &os.ProcAttr{Files: []*os.File{os.Stdin, os.Stdout, os.Stderr}})
-				if state, _ := proc.Wait(); state.Success() {
+				if err := exec.Command(os.Args[2], os.Args[2:]...).Run(); err == nil {
 					break
 				}
 			}

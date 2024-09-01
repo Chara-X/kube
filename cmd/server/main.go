@@ -7,6 +7,7 @@ import (
 	"net/http/httputil"
 	"os"
 	"os/exec"
+	"syscall"
 
 	core "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,53 +18,70 @@ import (
 var cmds = map[string]*exec.Cmd{}
 
 func main() {
-	defer func() {
-		for _, cmd := range cmds {
-			cmd.Process.Kill()
-		}
-	}()
-	var mux = http.NewServeMux()
-	mux.HandleFunc("GET /apis", func(w http.ResponseWriter, r *http.Request) {
+	var router = http.NewServeMux()
+	router.HandleFunc("GET /apis", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json;g=apidiscovery.k8s.io;v=v2;as=APIGroupDiscoveryList")
 		var apis = &apidiscovery.APIGroupDiscoveryList{}
 		var data, _ = os.ReadFile("./apis.yaml")
 		yaml.Unmarshal(data, apis)
 		json.NewEncoder(w).Encode(apis)
 	})
-	mux.HandleFunc("POST /api/v1/namespaces/default/pods", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("POST /api/v1/namespaces/default/pods", func(w http.ResponseWriter, r *http.Request) {
 		var pod = core.Pod{}
 		json.NewDecoder(r.Body).Decode(&pod)
-		var cmd = exec.Command(pod.Spec.Containers[0].Image)
+		var con = pod.Spec.Containers[0]
+		var cmd = exec.Command(con.Image)
+		cmd.SysProcAttr = &syscall.SysProcAttr{
+			Pdeathsig: syscall.SIGKILL,
+		}
 		cmd.Start()
-		cmds[pod.Name] = cmd
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(toPod(pod.Name, cmd))
+		switch pod.Spec.RestartPolicy {
+		case core.RestartPolicyAlways:
+			go func() {
+				for {
+					if err := cmd.Run(); err == nil {
+						break
+					}
+					cmd = exec.Command(con.Image)
+					cmd.Start()
+				}
+			}()
+		case core.RestartPolicyOnFailure:
+		}
+		// go func() {
+		// 	for state:=cmd.wa; pod.Spec.RestartPolicy==core.RestartPolicyAlways||(pod.Spec.RestartPolicy==core.RestartPolicyOnFailure&&cmd.ProcessState.ExitCode()!=0) {
+		// 		cmd = exec.Command(con.Image)
+		// 		cmd.Start()
+		// 	}
+		// }()
+		cmds[con.Name] = cmd
+		json.NewEncoder(w).Encode(newPod(con.Name, cmd))
 	})
-	mux.HandleFunc("PUT /api/v1/namespaces/default/pods/{name}", func(w http.ResponseWriter, r *http.Request) {})
-	mux.HandleFunc("DELETE /api/v1/namespaces/default/pods/{name}", func(w http.ResponseWriter, r *http.Request) {})
-	mux.HandleFunc("GET /api/v1/namespaces/default/pods/{name}", func(w http.ResponseWriter, r *http.Request) {
-		var cmd, ok = cmds[r.PathValue("name")]
-		w.Header().Set("Content-Type", "application/json")
-		if !ok {
-			var status = meta.Status{Reason: "NotFound", Message: "Pod not found", Code: http.StatusNotFound}
-			w.WriteHeader(http.StatusNotFound)
-			json.NewEncoder(w).Encode(status)
+	router.HandleFunc("DELETE /api/v1/namespaces/default/pods/{name}", func(w http.ResponseWriter, r *http.Request) {
+		var name = r.PathValue("name")
+		var cmd = cmds[name]
+		cmd.Process.Kill()
+		delete(cmds, name)
+		json.NewEncoder(w).Encode(newPod(name, cmd))
+	})
+	router.HandleFunc("GET /api/v1/namespaces/default/pods/{name}", func(w http.ResponseWriter, r *http.Request) {
+		if cmd, ok := cmds[r.PathValue("name")]; ok {
+			json.NewEncoder(w).Encode(newPod(r.PathValue("name"), cmd))
 		} else {
-			json.NewEncoder(w).Encode(toPod(r.PathValue("name"), cmd))
+			json.NewEncoder(w).Encode(meta.Status{Reason: "NotFound", Message: "Pod not found", Code: http.StatusNotFound})
 		}
 	})
-	mux.HandleFunc("GET /api/v1/namespaces/default/pods", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("GET /api/v1/namespaces/default/pods", func(w http.ResponseWriter, r *http.Request) {
 		var pods = &core.PodList{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "PodList"}}
-		w.Header().Set("Content-Type", "application/json")
 		for k, v := range cmds {
-			pods.Items = append(pods.Items, toPod(k, v))
+			pods.Items = append(pods.Items, newPod(k, v))
 		}
 		json.NewEncoder(w).Encode(pods)
 	})
-	http.ListenAndServe("127.0.0.1:6443", &logsMiddleware{next: mux})
+	http.ListenAndServe("127.0.0.1:6443", &middleware{next: router})
 }
 
-func toPod(name string, cmd *exec.Cmd) core.Pod {
+func newPod(name string, cmd *exec.Cmd) core.Pod {
 	return core.Pod{
 		TypeMeta:   meta.TypeMeta{APIVersion: "v1", Kind: "Pod"},
 		ObjectMeta: meta.ObjectMeta{Name: name, Namespace: "default"},
@@ -74,10 +92,11 @@ func toPod(name string, cmd *exec.Cmd) core.Pod {
 	}
 }
 
-type logsMiddleware struct{ next http.Handler }
+type middleware struct{ next http.Handler }
 
-func (l *logsMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+func (m *middleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var dumpReq, _ = httputil.DumpRequest(r, true)
 	fmt.Println(string(dumpReq))
-	l.next.ServeHTTP(w, r)
+	w.Header().Set("Content-Type", "application/json")
+	m.next.ServeHTTP(w, r)
 }
