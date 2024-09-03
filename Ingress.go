@@ -14,9 +14,9 @@ type Ingress struct {
 	srv *http.Server
 }
 
-func (ig *Ingress) Start() error {
+func (ig *Ingress) Run(ctx context.Context) error {
 	ig.srv = &http.Server{
-		Addr: ":80",
+		Addr: ":" + strconv.Itoa(int(ig.Spec.DefaultBackend.Service.Port.Number)),
 		Handler: &httputil.ReverseProxy{
 			Director: func(req *http.Request) {
 				for _, path := range ig.Spec.Rules[0].HTTP.Paths {
@@ -27,9 +27,9 @@ func (ig *Ingress) Start() error {
 			},
 		},
 	}
+	go func() {
+		<-ctx.Done()
+		ig.srv.Shutdown(context.Background())
+	}()
 	return ig.srv.ListenAndServe()
-}
-
-func (ig *Ingress) Stop() error {
-	return ig.srv.Shutdown(context.Background())
 }

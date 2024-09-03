@@ -1,6 +1,7 @@
 package kube
 
 import (
+	"context"
 	"sync"
 
 	apps "k8s.io/api/apps/v1"
@@ -13,19 +14,15 @@ type Replicas struct {
 	pods []*Pod
 }
 
-func (r *Replicas) Start() error {
+func (r *Replicas) Run(ctx context.Context) error {
 	var wg = sync.WaitGroup{}
 	wg.Add(int(*r.Spec.Replicas))
 	for i := 0; i < int(*r.Spec.Replicas); i++ {
 		go func() {
 			for {
-				var pod = &Pod{Pod: &core.Pod{
-					TypeMeta:   meta.TypeMeta{APIVersion: "v1", Kind: "Pod"},
-					ObjectMeta: r.ObjectMeta,
-					Spec:       r.Spec.Template.Spec,
-				}}
+				var pod = &Pod{Pod: &core.Pod{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "Pod"}, ObjectMeta: r.ObjectMeta, Spec: r.Spec.Template.Spec}}
 				r.pods = append(r.pods, pod)
-				if pod.Start() == nil {
+				if pod.Run(ctx) == nil {
 					break
 				}
 			}
@@ -33,13 +30,5 @@ func (r *Replicas) Start() error {
 		}()
 	}
 	wg.Wait()
-	return nil
-}
-func (r *Replicas) Stop() error {
-	for _, pod := range r.pods {
-		if err := pod.Stop(); err != nil {
-			return err
-		}
-	}
 	return nil
 }
