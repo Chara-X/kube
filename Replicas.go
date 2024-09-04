@@ -10,31 +10,30 @@ import (
 
 type Replicas struct {
 	*apps.ReplicaSet
-	pods []*Pod
+	pods  []*Pod
+	Mutex *sync.Mutex
 }
 
 func (r *Replicas) Start(ctx *Context) error {
-	var wg = sync.WaitGroup{}
-	wg.Add(int(*r.Spec.Replicas))
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
 	for i := 0; i < int(*r.Spec.Replicas); i++ {
+		var pod = &Pod{Pod: &core.Pod{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "Pod"}, ObjectMeta: r.Spec.Template.ObjectMeta, Spec: r.Spec.Template.Spec}}
+		ctx.Create(pod.Name, pod)
 		go func() {
-			for {
-				var pod = &Pod{Pod: &core.Pod{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "Pod"}, ObjectMeta: r.ObjectMeta, Spec: r.Spec.Template.Spec}}
-				r.pods = append(r.pods, pod)
-				if pod.Start(ctx) == nil {
-					break
-				}
-			}
-			wg.Done()
+			pod.Start(ctx)
 		}()
 	}
-	wg.Wait()
 	return nil
 }
-
-func (r *Replicas) Stop() error {
+func (r *Replicas) Stop(ctx *Context) error {
+	r.Mutex.Lock()
+	defer r.Mutex.Unlock()
 	for _, pod := range r.pods {
-		pod.Stop()
+		ctx.Delete(pod.Name)
+		go func() {
+			pod.Stop(ctx)
+		}()
 	}
 	return nil
 }

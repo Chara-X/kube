@@ -40,7 +40,7 @@ func (p *Pod) Start(ctx *Context) error {
 				for p.cmd.ProcessState == nil && exec.Command(probe.Exec.Command[0], probe.Exec.Command[0:]...).Run() == nil {
 					time.Sleep(time.Duration(probe.PeriodSeconds) * time.Second)
 				}
-				p.Stop()
+				p.Stop(ctx)
 			}()
 		}
 		var err = p.cmd.Wait()
@@ -55,6 +55,6 @@ func (p *Pod) Start(ctx *Context) error {
 		return err
 	}
 }
-func (p *Pod) Stop() error {
+func (p *Pod) Stop(ctx *Context) error {
 	return p.cmd.Cancel()
 }
