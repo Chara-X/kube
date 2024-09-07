@@ -4,7 +4,7 @@ Items:
   - Versions:
       - Version: v1
         Resources:
-          - Resource: pod
+          - Resource: pods
             ResponseKind:
               group: ""
               version: v1
@@ -21,7 +21,7 @@ Items:
               - po
             Categories:
               - all
-          - Resource: replicas
+          - Resource: replicases
             ResponseKind:
               version: v1
               kind: Replicas
@@ -37,7 +37,7 @@ Items:
               - rs
             Categories:
               - all
-          - Resource: ingress
+          - Resource: ingresses
             ResponseKind:
               version: v1
               kind: Ingress
@@ -51,5 +51,21 @@ Items:
               - delete
             ShortNames:
               - ing
+            Categories:
+              - all
+          - Resource: configmaps
+            ResponseKind:
+              version: v1
+              kind: ConfigMap
+            Scope: Namespaced
+            SingularResource: configmap
+            Verbs:
+              - get
+              - list
+              - create
+              - update
+              - delete
+            ShortNames:
+              - cm
             Categories:
               - all

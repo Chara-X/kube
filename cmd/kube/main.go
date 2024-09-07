@@ -24,13 +24,13 @@ func main() {
 	router.HandleFunc("POST /api/v1/namespaces/default/{resource}", func(w http.ResponseWriter, r *http.Request) {
 		var obj client.Object
 		switch r.PathValue("resource") {
-		case "pod":
+		case "pods":
 			obj = &kube.Pod{}
-		case "replicas":
+		case "replicases":
 			obj = &kube.Replicas{}
-		case "ingress":
+		case "ingresses":
 			obj = &kube.Ingress{}
-		case "configmap":
+		case "configmaps":
 			obj = &core.ConfigMap{}
 		}
 		json.NewDecoder(r.Body).Decode(obj)
@@ -74,7 +74,7 @@ func main() {
 		var resource, list = r.PathValue("resource"), &meta.List{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "List"}}
 		ctx.Range(func(key, value any) bool {
 			var obj = value.(client.Object)
-			if resource == strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind) {
+			if strings.HasPrefix(resource, strings.ToLower(obj.GetObjectKind().GroupVersionKind().Kind)) {
 				list.Items = append(list.Items, runtime.RawExtension{Object: obj})
 			}
 			return true
