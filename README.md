@@ -3,6 +3,7 @@
 ```sh
 kubectl create -f <filename> --validate=false
 kubectl delete -f <filename> --wait=false
+kubectl get <resource> <name> -o yaml
 kubectl logs <pod-name>
 ```
 
@@ -14,11 +15,22 @@ metadata:
 spec:
   containers:
     - image: /home/chara-x/daisy/codes/go/.experimental/playground/playground
+      env:
+        - name: USERNAME
+          valueFrom:
+            configMapKeyRef:
+              name: cm
+              key: username
+        - name: PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: cm
+              key: password
 ```
 
 ```yaml
 apiVersion: v1
-kind: Replicas
+kind: ReplicaSet
 metadata:
   name: playground
 spec:
@@ -52,6 +64,16 @@ spec:
               service:
                 port:
                   number: 8082
+```
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cm
+data:
+  username: "chara-x"
+  password: "123"
 ```
 
 ## References

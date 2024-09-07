@@ -26,8 +26,8 @@ func main() {
 		switch r.PathValue("resource") {
 		case "pods":
 			obj = &kube.Pod{}
-		case "replicases":
-			obj = &kube.Replicas{}
+		case "replicasets":
+			obj = &kube.ReplicaSet{}
 		case "ingresses":
 			obj = &kube.Ingress{}
 		case "configmaps":

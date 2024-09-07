@@ -9,12 +9,12 @@ import (
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-type Replicas struct {
+type ReplicaSet struct {
 	*apps.ReplicaSet
 	pods []*Pod
 }
 
-func (r *Replicas) Start(ctx *sync.Map) error {
+func (r *ReplicaSet) Start(ctx *sync.Map) error {
 	r.SetCreationTimestamp(meta.Now())
 	r.Status.Replicas = *r.Spec.Replicas
 	for i := 0; i < int(*r.Spec.Replicas); i++ {
@@ -33,7 +33,7 @@ func (r *Replicas) Start(ctx *sync.Map) error {
 	}
 	return nil
 }
-func (r *Replicas) Stop(ctx *sync.Map) error {
+func (r *ReplicaSet) Stop(ctx *sync.Map) error {
 	r.Status.Replicas = 0
 	for _, pod := range r.pods {
 		ctx.Delete(pod.Name)

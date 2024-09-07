@@ -21,12 +21,12 @@ Items:
               - po
             Categories:
               - all
-          - Resource: replicases
+          - Resource: replicasets
             ResponseKind:
               version: v1
-              kind: Replicas
+              kind: ReplicaSet
             Scope: Namespaced
-            SingularResource: replicas
+            SingularResource: replicaset
             Verbs:
               - get
               - list

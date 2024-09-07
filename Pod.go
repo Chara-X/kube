@@ -40,6 +40,14 @@ func (p *Pod) Start(ctx *sync.Map) error {
 	switch p.Pod.Spec.RestartPolicy {
 	default:
 		p.cmd = exec.CommandContext(context.Background(), container.Image, container.Args...)
+		for _, env := range container.Env {
+			if env.Value != "" {
+				p.cmd.Env = append(p.cmd.Env, env.Name+"="+env.Value)
+			} else if env.ValueFrom != nil {
+				var obj, _ = ctx.Load(env.ValueFrom.ConfigMapKeyRef.Name)
+				p.cmd.Env = append(p.cmd.Env, env.Name+"="+obj.(*core.ConfigMap).Data[env.ValueFrom.ConfigMapKeyRef.Key])
+			}
+		}
 		p.Stdin, _ = p.cmd.StdinPipe()
 		p.Stdout, _ = p.cmd.StdoutPipe()
 		p.Stderr, _ = p.cmd.StderrPipe()
