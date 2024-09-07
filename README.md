@@ -1,5 +1,59 @@
 # kube
 
+```sh
+kubectl create -f <filename> --validate=false
+kubectl delete -f <filename> --wait=false
+kubectl logs <pod-name>
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: playground
+spec:
+  containers:
+    - image: /home/chara-x/daisy/codes/go/.experimental/playground/playground
+```
+
+```yaml
+apiVersion: v1
+kind: Replicas
+metadata:
+  name: playground
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - image: /home/chara-x/daisy/codes/go/.experimental/playground/playground
+```
+
+```yaml
+apiVersion: v1
+kind: Ingress
+metadata:
+  name: playground
+spec:
+  defaultBackend:
+    service:
+      port:
+        number: 8080
+  rules:
+    - http:
+        paths:
+          - path: "/happy"
+            backend:
+              service:
+                port:
+                  number: 8081
+          - path: "/sad"
+            backend:
+              service:
+                port:
+                  number: 8082
+```
+
 ## References
 
 [Creating a Custom Scheduler in Kubernetes: A Practical Guide](https://overcast.blog/creating-a-custom-scheduler-in-kubernetes-a-practical-guide-2d9f9254f3b5?gi=b0f3b2d6b422)

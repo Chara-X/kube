@@ -1,0 +1,55 @@
+apiVersion: apidiscovery.k8s.io/v2
+kind: APIGroupDiscoveryList
+Items:
+  - Versions:
+      - Version: v1
+        Resources:
+          - Resource: pod
+            ResponseKind:
+              group: ""
+              version: v1
+              kind: Pod
+            Scope: Namespaced
+            SingularResource: pod
+            Verbs:
+              - get
+              - list
+              - create
+              - update
+              - delete
+            ShortNames:
+              - po
+            Categories:
+              - all
+          - Resource: replicas
+            ResponseKind:
+              version: v1
+              kind: Replicas
+            Scope: Namespaced
+            SingularResource: replicas
+            Verbs:
+              - get
+              - list
+              - create
+              - update
+              - delete
+            ShortNames:
+              - rs
+            Categories:
+              - all
+          - Resource: ingress
+            ResponseKind:
+              version: v1
+              kind: Ingress
+            Scope: Namespaced
+            SingularResource: ingress
+            Verbs:
+              - get
+              - list
+              - create
+              - update
+              - delete
+            ShortNames:
+              - ing
+            Categories:
+              - all
