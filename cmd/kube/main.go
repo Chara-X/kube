@@ -34,6 +34,7 @@ func main() {
 			obj = &core.ConfigMap{}
 		}
 		json.NewDecoder(r.Body).Decode(obj)
+		obj.SetCreationTimestamp(meta.Now())
 		ctx.Store(obj.GetName(), obj)
 		if obj, ok := obj.(kube.Object); ok {
 			go func() {
@@ -81,7 +82,7 @@ func main() {
 		})
 		json.NewEncoder(w).Encode(list)
 	})
-	http.ListenAndServe("127.0.0.1:6443", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	http.ListenAndServe(":6443", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var req, _ = httputil.DumpRequest(r, true)
 		fmt.Println(string(req))
 		w.Header().Set("Content-Type", "application/json")

@@ -11,7 +11,6 @@ import (
 	"time"
 
 	core "k8s.io/api/core/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Pod struct {
@@ -24,7 +23,6 @@ type Pod struct {
 
 func (p *Pod) Start(ctx *sync.Map) error {
 	var container = p.Pod.Spec.Containers[0]
-	p.SetCreationTimestamp(meta.Now())
 	p.Status.Phase = core.PodPending
 	for _, volume := range p.Pod.Spec.Volumes {
 		os.Mkdir(volume.Name, 0755)

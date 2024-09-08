@@ -9,7 +9,6 @@ import (
 	"sync"
 
 	networking "k8s.io/api/networking/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type Ingress struct {
@@ -18,7 +17,6 @@ type Ingress struct {
 }
 
 func (i *Ingress) Start(ctx *sync.Map) error {
-	i.SetCreationTimestamp(meta.Now())
 	i.srv = &http.Server{
 		Addr: ":" + strconv.Itoa(int(i.Spec.DefaultBackend.Service.Port.Number)),
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

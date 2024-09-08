@@ -15,7 +15,6 @@ type ReplicaSet struct {
 }
 
 func (r *ReplicaSet) Start(ctx *sync.Map) error {
-	r.SetCreationTimestamp(meta.Now())
 	r.Status.Replicas = *r.Spec.Replicas
 	for i := 0; i < int(*r.Spec.Replicas); i++ {
 		go func() {
@@ -23,6 +22,7 @@ func (r *ReplicaSet) Start(ctx *sync.Map) error {
 				var pod = &Pod{Pod: &core.Pod{TypeMeta: meta.TypeMeta{APIVersion: "v1", Kind: "Pod"}, ObjectMeta: r.Spec.Template.ObjectMeta, Spec: r.Spec.Template.Spec}}
 				pod.SetName(r.GetName() + "-" + uuid.New().String())
 				pod.SetNamespace(r.GetNamespace())
+				pod.SetCreationTimestamp(meta.Now())
 				ctx.Store(pod.GetName(), pod)
 				r.pods = append(r.pods, pod)
 				if err := pod.Start(ctx); err == nil {
