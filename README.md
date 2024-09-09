@@ -1,6 +1,7 @@
 # kube
 
 ```sh
+kubectl api-resources
 kubectl create -f <filename> --validate=false
 kubectl delete -f <filename> --wait=false
 kubectl get <resource> <name> -o yaml
