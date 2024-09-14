@@ -4,22 +4,6 @@ Items:
   - Versions:
       - Version: v1
         Resources:
-          - Resource: nodes
-            ResponseKind:
-              version: v1
-              kind: Node
-            Scope: Namespaced
-            SingularResource: node
-            Verbs:
-              - get
-              - list
-              - create
-              - update
-              - delete
-            ShortNames:
-              - no
-            Categories:
-              - all
           - Resource: pods
             ResponseKind:
               group: ""
