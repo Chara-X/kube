@@ -4,4 +4,4 @@ metadata: ObjectMeta
 rules:
   - apiGroups: []
     resources: []
-    verbs: []
+    verbs: ["create", "update", "replace", "delete", "get", "list", "watch"]

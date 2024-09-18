@@ -4,4 +4,4 @@ metadata: ObjectMeta
 spec:
   holderIdentity: ""
   leaseDurationSeconds: 0
-  renewTime: MicroTime
+  renewTime: "2006-01-02T15:04:05Z"
