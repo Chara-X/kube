@@ -1,7 +1,0 @@
-apiVersion: apps/v1
-kind: DaemonSet
-metadata: ObjectMeta
-spec:
-  selector:
-    matchLabels: {}
-  template: PodTemplateSpec

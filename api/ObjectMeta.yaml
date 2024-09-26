@@ -1,9 +1,0 @@
-name: ""
-namespace: ""
-labels: {}
-annotations: {}
-ownerReferences:
-  - apiVersion: ""
-    kind: ""
-    name: ""
-    uid: ""
